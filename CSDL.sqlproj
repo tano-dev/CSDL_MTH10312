@@ -58,6 +58,6 @@
     <Folder Include="Properties" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="BTVN.sql" />
+    <Build Include="Scripts csdl_taxi.sql" />
   </ItemGroup>
 </Project>
