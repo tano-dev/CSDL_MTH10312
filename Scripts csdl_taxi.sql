@@ -1,42 +1,43 @@
 ﻿CREATE DATABASE TAXI_23110163;
+
 USE TAXI_23110163;
 
-CREATE TABLE LAIXE(
-	MaLX int not null,
-	Ho varchar(15),
-	Dem varchar(15),
-	Ten varchar(15) not null,
-	NgaySinh date,
-	SoGP char(12) not null,
-	HanGP date,
-	CONSTRAINT PK_LAIXE PRIMARY KEY(MaLX)
+CREATE TABLE LAIXE (
+    MaLX     INT          NOT NULL,
+    Ho       VARCHAR (15),
+    Dem      VARCHAR (15),
+    Ten      VARCHAR (15) NOT NULL,
+    NgaySinh DATE        ,
+    SoGP     CHAR (12)    NOT NULL,
+    HanGP    DATE        ,
+    CONSTRAINT PK_LAIXE PRIMARY KEY (MaLX)
 );
 
-CREATE TABLE LOAI_PHUONGTIEN(
-	LoaiPT int not null,
-	TenLoai int not null,
-	CONSTRAINT PK_LOAI_PHUONGTIEN PRIMARY KEY(LoaiPT)
+CREATE TABLE LOAI_PHUONGTIEN (
+    LoaiPT  INT NOT NULL,
+    TenLoai INT NOT NULL,
+    CONSTRAINT PK_LOAI_PHUONGTIEN PRIMARY KEY (LoaiPT)
 );
 
-CREATE TABLE PHUONGTIEN(
-	LoaiPT int not null,
-	SoPT int not null,
-	BienSo char(10) not null,
-	NamSanXuat int not null,
-	ChuPT int,
-	TinhTrang int check(TinhTrang in(0,1)), 
-	constraint PK_PHUONGTIEN PRIMARY KEY(SoPT),
-	constraint FK_PHUONGTIEN_LOAI_PHUONGTIEN foreign key(LoaiPT) references LOAI_PHUONGTIEN(LoaiPT),
-	constraint FK_PHUONGTIEN_LAIXE foreign key(ChuPT) references LAIXE(MaLX)
+CREATE TABLE PHUONGTIEN (
+    LoaiPT     INT       NOT NULL,
+    SoPT       INT       NOT NULL,
+    BienSo     CHAR (10) NOT NULL,
+    NamSanXuat INT       NOT NULL,
+    ChuPT      INT      ,
+    TinhTrang  INT       CHECK (TinhTrang IN (0, 1)),
+    CONSTRAINT PK_PHUONGTIEN PRIMARY KEY (SoPT),
+    CONSTRAINT FK_PHUONGTIEN_LOAI_PHUONGTIEN FOREIGN KEY (LoaiPT) REFERENCES LOAI_PHUONGTIEN (LoaiPT),
+    CONSTRAINT FK_PHUONGTIEN_LAIXE FOREIGN KEY (ChuPT) REFERENCES LAIXE (MaLX)
 );
 
-CREATE TABLE CALAMVIEC(
-	MaCLV int not null,
-	MaLX int not null,
-	SoPT int not null,
-	BatDau datetime,
-	KetThuc datetime,
-	CONSTRAINT PK_CALAMVIEC PRIMARY KEY(MaCLV),
-	constraint FK_CALAMVIEC_LAIXE foreign key(MaLX) references LAIXE(MaLX),
-	constraint FK_CALAMVIEC_PHUONGTIEN foreign key(SoPT) references PHUONGTIEN(SoPT)
+CREATE TABLE CALAMVIEC (
+    MaCLV   INT      NOT NULL,
+    MaLX    INT      NOT NULL,
+    SoPT    INT      NOT NULL,
+    BatDau  DATETIME,
+    KetThuc DATETIME,
+    CONSTRAINT PK_CALAMVIEC PRIMARY KEY (MaCLV),
+    CONSTRAINT FK_CALAMVIEC_LAIXE FOREIGN KEY (MaLX) REFERENCES LAIXE (MaLX),
+    CONSTRAINT FK_CALAMVIEC_PHUONGTIEN FOREIGN KEY (SoPT) REFERENCES PHUONGTIEN (SoPT)
 );

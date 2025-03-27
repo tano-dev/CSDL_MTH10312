@@ -59,5 +59,6 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Scripts csdl_taxi.sql" />
+    <Build Include="Scripts csdl_doithicong.sql" />
   </ItemGroup>
 </Project>

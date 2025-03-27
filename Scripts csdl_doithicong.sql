@@ -1,0 +1,79 @@
+﻿CREATE DATABASE DOTHICONG_23110163;
+
+USE DOTHICONG_23110163;
+
+CREATE TABLE HANG (
+    HangCN    INT            NOT NULL,
+    HeSoLuong DECIMAL (3, 1) NOT NULL,
+    CONSTRAINT PK_HANG PRIMARY KEY (HangCN)
+);
+
+CREATE TABLE CONGNHAN (
+    MaCN          INT          NOT NULL,
+    Ho            VARCHAR (30) NOT NULL,
+    Ten           VARCHAR (15) NOT NULL,
+    NgaySinh      DATE        ,
+    GioiTinh      CHAR (1)     CHECK (GioiTinh IN ('m', 'M', 'f', 'F')),
+    HangCN        INT          NOT NULL CHECK (HangCN IN (1, 2, 3, 4, 5)),
+    NgayTuyenDung DATE        ,
+    MaDoi         INT          NOT NULL,
+    CONSTRAINT PK_CONGNHAN PRIMARY KEY (MaCN),
+    CONSTRAINT FK_CONGNHAN_HANG FOREIGN KEY (HangCN) REFERENCES HANG (HangCN)
+);
+
+CREATE TABLE DOITHICONG (
+    MaDoi      INT NOT NULL,
+    DoiTruong  INT,
+    ThuocDonVi INT NOT NULL,
+    CONSTRAINT PK_DOITHICONG PRIMARY KEY (MaDoi),
+    CONSTRAINT FK_DOITHICONG_CONGNHAN FOREIGN KEY (DoiTruong) REFERENCES CONGNHAN (MaCN)
+);
+
+ALTER TABLE CONGNHAN
+    ADD CONSTRAINT FK_CONGNHAN_DOITHICONG FOREIGN KEY (MaDoi) REFERENCES DOITHICONG (MaDoi);
+
+CREATE TABLE CONGTRINH (
+    MaCT       INT          NOT NULL,
+    TenCT      VARCHAR (50) NOT NULL,
+    DiaDiem    VARCHAR (50),
+    DonViChinh INT          NOT NULL,
+    CONSTRAINT PK_CONGTRINH PRIMARY KEY (MaCT)
+);
+
+CREATE TABLE CHAMCONG (
+    MaCT        INT   NOT NULL,
+    MaDoi       INT   NOT NULL,
+    MaCN        INT   NOT NULL,
+    NgayLamViec DATE  NOT NULL,
+    SoGio       FLOAT NOT NULL,
+    CONSTRAINT PK_CHAMCONG PRIMARY KEY (MaCT, MaDoi, MaCN, NgayLamViec),
+    CONSTRAINT FK_CHAMCONG_CONGTRINH FOREIGN KEY (MaCT) REFERENCES CONGTRINH (MaCT),
+    CONSTRAINT FK_CHAMCONG_DOITHICONG FOREIGN KEY (MaDoi) REFERENCES DOITHICONG (MaDoi),
+    CONSTRAINT FK_CHAMCONG_CONGNHAN FOREIGN KEY (MaCN) REFERENCES CONGNHAN (MaCN)
+);
+
+INSERT INTO HANG(HangCN, HeSoLuong) VALUES
+    (1, 3.0),
+    (2, 3.5),
+    (3, 4.0),
+    (4, 4.5),
+    (5, 5.0);
+
+INSERT INTO CONGTRINH(MaCT, TenCT, DiaDiem, DonViChinh) VALUES
+    (11, 'Nha o Tran Thai Binh', 'Quan 3', 10),
+    (12, 'Van phong HBC', 'Quan 7', 20);
+
+INSERT INTO DOITHICONG(MaDoi, DoiTruong, ThuocDonVi) VALUES
+    (1, null, 10),
+    (2, null, 20);
+
+INSERT INTO CONGNHAN(MaCN, Ho, Ten, NgaySinh, GioiTinh, HangCN, NgayTuyenDung, MaDoi) VALUES
+    (118, 'Tran Van', 'Hung', '2000-08-15', 'M', 1, '2023-11-01', 1),
+    (138, 'Nguyen', 'Khanh', '1995-04-23', 'M', 3, '2021-03-01', 2);
+
+
+INSERT INTO CHAMCONG(MaCT, MaDoi, MaCN, NgayLamViec, SoGio) VALUES
+    (11, 1, 118, '2024-03-11', 8.0),
+    (12, 2, 138, '2024-04-05', 8.0);
+
+SELECT * FROM HANG;
