@@ -1,5 +1,4 @@
-﻿
-CREATE DATABASE csdl_xebuyt;
+﻿CREATE DATABASE csdl_xebuyt;
 GO
 
 USE csdl_xebuyt;
@@ -445,8 +444,6 @@ Cho lược đồ csdl Xe buýt trong tập tin "Cơ sở dữ liệu - Xe buýt
 2.    Với mỗi trạm dừng ở đường Hàm Nghi, Quận 1, cho biết mã số trạm, tên trạm và mã số các tuyến xe buýt có lộ trình qua trạm đó. (Lưu ý dữ liệu sử dụng tiếng Việt không dấu).
 3.    Cho biết mã số trạm, tên trạm, loại của các trạm dừng ở Quận 12 thuộc lộ trình của các tuyến xe buýt số 3. (Lưu ý dữ liệu sử dụng tiếng Việt không dấu).
 4.    Cho biết mã số trạm, tên trạm, loại của các trạm dừng khởi hành của các tuyến xe buýt.
--- Cau 4
-
 5.    Cho biết tên mã số tuyến, tên tuyến của các tuyến xe buýt có lộ trình đi qua trạm dừng có tên là Chợ Cũ ở Quận 1. (Lưu ý dữ liệu sử dụng tiếng Việt không dấu).
 6.    Cho biết tên đơn vị vận hành có tuyến xe buýt có lộ trình đi qua trạm dừng có mã số 53.
 7.    Với các tuyến buýt có số chuyến trong ngày nhỏ hơn 250, cho biết mã số, tên tuyến, cự ly và tên trạm dừng khởi hành.
@@ -465,7 +462,6 @@ select matb, tentuyen, culy, dvvanhanh.tendonvi
 from tuyenbuyt
 join dvvanhanh on tuyenbuyt.madv = dvvanhanh.madv
 where culy > 20000;
-
 -- Cau 2
 select tramdung.matd, tentram, lotrinh.matb
 from tramdung
@@ -482,3 +478,57 @@ select tramdung.matd, tentram, loai
 from tramdung
 join lotrinh on tramdung.matd = lotrinh.matd
 where lotrinh.thututram = 1;
+-- Cau 5
+select tuyenbuyt.matb, tentuyen
+from tuyenbuyt
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+where tentram like '%CHO CU%' and diadiem like '%QUAN 1%';
+-- Cau 6
+select dvvanhanh.tendonvi
+from dvvanhanh
+join tuyenbuyt on dvvanhanh.madv = tuyenbuyt.madv
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+where tramdung.matd = 53;
+-- Cau 7
+select tuyenbuyt.matb, tentuyen, culy, tramdung.tentram
+from tuyenbuyt
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+where sochuyen < 250 and lotrinh.thututram = 1; 
+-- Cau 8
+select tuyenbuyt.matb, tentuyen
+from tuyenbuyt
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+where loai = 'BEN XE' and diadiem like '%PHAM NGU LAO, QUAN 1%';
+-- Cau 9
+select tuyenbuyt.matb, tentuyen, culy, tramdung.tentram, tramdung.diadiem
+from tuyenbuyt
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+join dvvanhanh on tuyenbuyt.madv = dvvanhanh.madv
+where dvvanhanh.tendonvi like '%HTX VAN TAI 19/5%'
+order by tuyenbuyt.matb, lotrinh.thututram;
+-- Cau 10
+select tuyenbuyt.matb, tentuyen
+from tuyenbuyt
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+where tentram like '%DEN THO AN GIAO%' and diadiem like '%PASTEUR%'
+order by tuyenbuyt.matb asc;
+-- Cau 11
+select tramdung.matd, tentram, diadiem, lotrinh.matb
+from tramdung
+join lotrinh on tramdung.matd = lotrinh.matd
+where diadiem like '%QUAN 1%'
+order by tentram asc, lotrinh.matb asc;
+-- Cau 12
+select dvvanhanh.tendonvi, tuyenbuyt.matb, tuyenbuyt.culy
+from dvvanhanh
+join tuyenbuyt on dvvanhanh.madv = tuyenbuyt.madv
+join lotrinh on tuyenbuyt.matb = lotrinh.matb
+join tramdung on lotrinh.matd = tramdung.matd
+where tramdung.matd = 36
+order by dvvanhanh.tendonvi asc, tuyenbuyt.matb asc;

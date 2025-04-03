@@ -213,36 +213,36 @@ ORDER BY nhanvien.tennv, nhanvien.honv;
 
 
 
---1
+--Cau 1
 SELECT manv,tennv,ngaysinh,luong 
 from nhanvien  
 where mapb = 4;
---2
+--Cau 2
 Select * from nhanvien where luong > 30000;
---3
+--Cau 3
 Select * from nhanvien 
 where (luong > 25000 and mapb = 4) 
 or (luong > 30000 and mapb = 5);
---4
+--Cau 4
 select honv,ngaysinh,diachi
 from nhanvien
 where diachi like '%TpHCM';
---5
+--Cau 5
 select ngaysinh, diachi
 from nhanvien
 where honv = 'Nguyen' and dem = 'Bao' and tennv = 'Hung';
---6
+--Cau 6
 select * from nhanvien
 where diachi LIKE '%Phu Nhuan%';
---7
+--Cau 7
 select * from nhanvien
 where YEAR(nhanvien.ngaysinh) = 1950;
---8
+--Cau 8
 select distinct luong from nhanvien;
---9
+--Cau 9
 select * from nhanvien 
 where mags is null;	
---10
+--Cau 10
 select phongban.tenpb, truso_phong.truso
 from phongban
 join truso_phong on truso_phong.mapb = phongban.mapb;
