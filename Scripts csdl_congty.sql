@@ -295,6 +295,16 @@ select phongban.tenpb, truso_phong.truso
 from phongban
 join truso_phong on truso_phong.mapb = phongban.mapb;
 --Cau 11
-select phongban.tenpb, nhanvien.honv, nhanvien.tennv
-
-
+select phongban.tenpb, nhanvien.honv, nhanvien.dem, nhanvien.tennv
+from phongban
+join nhanvien on nhanvien.manv = phongban.maql;
+--Cau 12
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, thannhan.tentn
+from nhanvien
+join thannhan on nhanvien.manv = thannhan.manv
+where nhanvien.gioitinh = 'F' or nhanvien.gioitinh = 'f';
+--Cau 13
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien.diachi
+from nhanvien
+join phongban on phongban.mapb = nhanvien.mapb
+where phongban.tenpb = 'Nghien cuu';
