@@ -211,6 +211,54 @@ left JOIN thannhan ON nhanvien.manv = thannhan.manv
 WHERE thannhan.manv is null
 ORDER BY nhanvien.tennv, nhanvien.honv;
 
+/*
+Chọn và kết
+1. Cho biết mã số, họ tên, ngày sinh của các nhân viên phòng số 4.
+2. Tìm những nhân viên có mức lương trên 30,000.
+3. Tìm những nhân viên có mức lương trên 25,000 ở phòng số 4 hoặc có mức
+lương trên 30,000 ở phòng số 5.
+4. Cho biết họ tên, ngày sinh, địa chỉ của các nhân viên ở TpHCM.
+5. Cho biết ngày sinh, địa chỉ của nhân viên có tên là “Nguyen Bao Hung”.
+6. Tìm những nhân viên có địa chỉ thuộc quận “Phu Nhuan”.
+7. Tìm những nhân viên sinh vào thập niên 1950.
+8. Cho biết các mức lương riêng biệt của các nhân viên.
+9. Tìm những nhân viên không có người giám sát.
+10.Với mỗi phòng ban, cho biết tên phòng ban và trụ sở của phòng.
+11.Với mỗi phòng ban, cho biết tên phòng ban và tên người trưởng phòng.
+12.Với mỗi nữ nhân viên, cho biết họ tên và tên người thân của nhân viên đó.
+13.Tìm tên và địa chỉ của các nhân viên làm việc trong phòng “Nghien cuu”.
+14.Cho biết mã dự án, tên phòng điều phối và họ tên, địa chỉ, ngày sinh của
+người trưởng phòng điều phối của các dự án có địa điểm là “Go Vap”.
+15.Với mỗi nhân viên, cho biết họ tên của nhân viên và họ tên của người giám
+sát nhân viên đó.
+16.Cho biết kết quả lương mới của các nhân viên tham gia dự án “San pham
+X” nếu như họ được tăng thêm 10% lương.
+17.Cho biết họ tên của nhân viên có người thân cùng tên và cùng giới tính với
+nhân viên đó.
+Gom nhóm, sắp xếp, kết ngoài
+18.Cho biết họ tên, mã phòng làm việc của các nhân viên và mã số các dự án
+mà họ tham gia, sắp xếp tăng dần theo mã phòng, trong mỗi phòng sắp xếp
+theo họ, tên với thứ tự alphabe.
+19.Cho biết tổng số nhân viên, mức lương cao nhất, mức lương thấp nhất và
+mức lương trung bình của phòng “Nghien cuu”.
+20.Với mỗi phòng, cho biết mã số phòng và tổng số nhân viên của phòng đó.
+21.Với mỗi phòng, cho biết mã số phòng và mức lương trung bình của các
+nhân viên của phòng đó.
+22.Với mỗi dự án có nhân viên tham gia, cho biết mã số, tên và tổng số nhân
+viên tham gia của dự án đó.
+23.Cho biết mã số, tên và tổng số nhân viên tham gia của dự án có nhiều hơn 2
+nhân viên tham gia.
+6
+24.Cho biết mã số, tên và tổng số nhân viên của các phòng có nhiều hơn 5
+nhân viên.
+25.Với mỗi dự án, cho biết mã số, tên và tổng số nhân viên tham gia của dự án
+đó.
+26.Với mỗi dự án, cho biết mã số, tên và tổng số nhân viên thuộc phòng số 5
+tham gia của dự án đó.
+27.Với mỗi nhân viên, cho biết họ tên và tổng số người thân của nhân viên đó.
+28.Với mỗi phòng có mức lương trung bình lớn hơn 30,000, cho biết tên
+phòng và tổng số nhân viên của phòng đó.
+*/
 
 
 --Cau 1
@@ -246,4 +294,7 @@ where mags is null;
 select phongban.tenpb, truso_phong.truso
 from phongban
 join truso_phong on truso_phong.mapb = phongban.mapb;
+--Cau 11
+select phongban.tenpb, nhanvien.honv, nhanvien.tennv
+
 
