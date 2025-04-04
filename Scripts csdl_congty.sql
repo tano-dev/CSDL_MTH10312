@@ -194,7 +194,7 @@ select * from phongban;
 select honv,dem,tennv,luong 
 from nhanvien
 join phongban on phongban.mapb = nhanvien.mapb
-where luong between 25000 and 45000 and pb.tenpb = 'Nghien cuu'
+where luong between 25000 and 45000 and phongban.tenpb = 'Nghien cuu'
 order by luong desc;
 --Q4
 select * from nhanvien
@@ -308,3 +308,29 @@ select nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien.diachi
 from nhanvien
 join phongban on phongban.mapb = nhanvien.mapb
 where phongban.tenpb = 'Nghien cuu';
+--Cau 14
+select duan.mada, phongban.tenpb, nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien.diachi, nhanvien.ngaysinh
+from duan
+join phongban on phongban.mapb = duan.mapb
+join nhanvien on nhanvien.mapb = phongban.mapb
+where duan.diadiem = 'Go Vap' and nhanvien.manv = phongban.maql;
+--Cau 15
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien2.honv, nhanvien2.dem, nhanvien2.tennv
+from nhanvien
+inner join nhanvien nhanvien2 on nhanvien.mags = nhanvien2.manv;
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien2.honv, nhanvien2.dem, nhanvien2.tennv
+from nhanvien
+left join nhanvien nhanvien2 on nhanvien.mags = nhanvien2.manv
+where nhanvien.mags is not null;
+--Cau 16
+select nhanvien.manv, nhanvien.luong, nhanvien.luong * 1.1
+from nhanvien
+join thamgia on thamgia.manv = nhanvien.manv
+join duan on thamgia.mada = duan.mada
+where duan.tenda = 'San pham X';
+--Cau 17
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, thannhan.tentn
+from nhanvien
+join thannhan on nhanvien.manv = thannhan.manv
+where (nhanvien.dem = thannhan.tentn or nhanvien.honv = thannhan.tentn or nhanvien.tennv = thannhan.tentn)  and nhanvien.gioitinh = thannhan.gioitinh;
+--Cau 18
