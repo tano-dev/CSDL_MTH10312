@@ -346,4 +346,5 @@ from phongban
 join nhanvien on phongban.mapb = nhanvien.mapb
 where phongban.tenpb = 'Nghien cuu'
 group by phongban.tenpb;
+--Cau 20
 

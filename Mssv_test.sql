@@ -1,7 +1,7 @@
-﻿-- Mssv: 23110168
--- Ho ten: Bui Ha Bao Khanh
+﻿-- Mssv: 23110163
+-- Ho ten: Nguyen Van Phuc Huy
 -- RDBMS: SQL Server
---CREATE DATABASE
+
 CREATE DATABASE csdl_khachsan;
 GO
 USE csdl_khachsan;
