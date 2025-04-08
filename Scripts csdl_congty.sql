@@ -346,3 +346,10 @@ join nhanvien on phongban.mapb = nhanvien.mapb
 where phongban.tenpb = 'Nghien cuu'
 group by phongban.tenpb;
 --Cau 20
+select phongban.mapb, count(nhanvien.manv) as 'Tong so nhan vien'
+from phongban
+join nhanvien on phongban.mapb = nhanvien.mapb
+group by phongban.mapb;
+--Cau 21
+select phongban.mapb, avg(nhanvien.luong) as 'Muc luong trung binh'	
+
