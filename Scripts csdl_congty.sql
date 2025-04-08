@@ -334,19 +334,16 @@ from nhanvien
 join thannhan on nhanvien.manv = thannhan.manv
 where (nhanvien.dem = thannhan.tentn or nhanvien.honv = thannhan.tentn or nhanvien.tennv = thannhan.tentn)  and nhanvien.gioitinh = thannhan.gioitinh;
 --Cau 18
-select nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien.mapb, thamgia.mada 
+
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, thamgia.mada
 from nhanvien
 join thamgia on thamgia.manv = nhanvien.manv
 join duan on thamgia.mada = duan.mada
 order by nhanvien.mapb, nhanvien.honv, nhanvien.dem;
 --Cau 19
-select count(nhanvien.manv), max(nhanvien.luong), min(nhanvien.luong), avg(nhanvien.luong)
-from nhanvien
-join phongban on phongban.mapb = nhanvien.mapb
-where phongban.tenpb = 'Nghien cuu';
---Cau 20
-select phongban.mapb, count(nhanvien.manv)
+select phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien', max(nhanvien.luong) as 'Muc luong cao nhat', min(nhanvien.luong) as 'Muc luong thap nhat', avg(nhanvien.luong) as 'Muc luong trung binh'
 from phongban
 join nhanvien on phongban.mapb = nhanvien.mapb
-group by phongban.mapb;
---Cau 21
+where phongban.tenpb = 'Nghien cuu'
+group by phongban.tenpb;
+
