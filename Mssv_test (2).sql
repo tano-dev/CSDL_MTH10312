@@ -1,91 +1,86 @@
 ﻿-- Mssv: 23110163
 -- Ho ten: Nguyen Van Phuc Huy
 -- RDBMS: SQL Server
-/*
-Cho lược đồ cơ sở dữ liệu quan hệ được mô tả như sau: - - - - 
-KHACHLUUTRU(SoCC, Ho, Ten, NgaySinh, SoDT) – Lưu thông tin khách lưu trú. 
-Mỗi khách lưu trú có số căn cước, họ tên, ngày sinh, số điện thoại. 
-LOAIPHONG (LoaiPG, DonGia, SoGiuong, KieuGiuong) – Lưu thông tin về phân 
-loại phòng. Mỗi loại phòng có đơn giá, số giường, kiểu giường. Khách sạn có 3 loại 
-phòng được xếp loại 1, 2, 3 và loại cao cấp nhất là 1. 
-PHONG(SoPG, LoaiPG, ViTri) – Lưu thông tin các phòng. Mỗi phòng có một số 
-phòng duy nhất, loại phòng, và vị trí phòng. Vị trí phòng được xếp theo thứ tự 1, 2, 3 
-và vị trí tốt nhất là 1. 
-DATPHONG(SoDP, SoPG, LoaiPG, SoCC, NgayDat, CachDat, NgayDen, NgayDi) – Lưu thông tin phiếu đặt phòng. Mỗi phiếu đặt phòng có số phòng, loại phòng, số 
-căn cước của khách hàng, ngày đặt phòng, cách thức đặt phòng (đại lý - A, điện thoại - C, ứng dụng - S, vãng lai – V), ngày đến, ngày đi. Mỗi phiếu đặt phòng có một số 
-phiếu duy nhất.
-
-Thuộc tính Kiểu dữ liệu 
-Ràng buộc 
-SoCC 
-Mô tả 
-char(12) 
-NOT NULL 
-Ho 
-Số căn cước của khách lưu trú. 
-varchar(30) 
-NOT NULL 
-Họ của khách lưu trú. 
-Ten 
-varchar(15) 
-NOT NULL 
-NgaySinh 
-Tên của khách lưu trú. 
-date  
-SoDT 
-Ngày sinh của khách lưu trú. 
-char(10) 
-NOT NULL 
-LoaiPG 
-Số điện thoại của khách lưu trú. 
-char 
-NOT NULL 
-(‘1’, ‘2’, ‘3’) 
-Xếp loại phòng của phòng. 
-DonGia 
-decimal(10,2) NOT NULL 
-SoGiuong 
-Đơn giá của loại phòng. 
-int 
-NOT NULL 
-1  SoGiuong  3 
-Số lượng giường của loại phòng. 
-KieuGiuong int 
-NOT NULL 
-(1, 2) 
-Kiểu giường (đơn hoặc đôi) của 
-loại phòng. 
-SoPG 
-int 
-int 
-NOT NULL 
-Số phòng. 
-ViTri 
-NOT NULL 
-(1, 2, 3) 
-Vị trí của phòng trong khách sạn. 
-SoDP 
-int 
-date 
-NOT NULL 
-Số phiếu đặt phòng. 
-NgayDat 
-NOT NULL 
-char 
-Ngày đặt phòng. 
-CachDat 
-NOT NULL 
-(‘A’, ‘C’, ‘S’, ‘V’) 
-Cách thức đặt phòng. 
-NgayDen 
-date 
-date 
-NOT NULL 
-Ngày nhận phòng. 
-NgayDi 
-NOT NULL 
-Ngày trả phòng.
-*/
 create database csdl_khachsan;
-Go;
-use csdl_khachsan
+Go
+use csdl_khachsan;
+
+create table KHACHLUUTRU(
+	SoCC char(12) NOT NULL,
+	Ho varchar(30) NOT NULL,
+	Ten varchar(15) NOT NULL,
+	NgaySinh date,
+	SoDT char(10) NOT NULL,
+	CONSTRAINT PK_KHACHLUUTRU PRIMARY KEY (SoCC),
+);
+create table LOAIPHONG(
+	LoaiPG char(1) NOT NULL CHECK (LoaiPG IN ('1','2','3')),
+	DonGia decimal(10,2) NOT NULL,
+	SoGiuong int NOT NULL CHECK (SoGiuong BETWEEN 1 AND 3),
+	KieuGiuong int NOT NULL CHECK (KieuGiuong IN (1, 2)),
+	CONSTRAINT PK_LOAIPHONG PRIMARY KEY (LoaiPG),
+);
+create table PHONG(
+	SoPG int NOT NULL,
+	LoaiPG char NOT NULL CHECK (LoaiPG IN ('1','2','3')),
+	ViTri int NOT NULL CHECK (ViTri IN (1, 2, 3)),
+	CONSTRAINT PK_PHONG PRIMARY KEY (SoPG),
+	CONSTRAINT FK_PHONG_LOAIPHONG FOREIGN KEY (LoaiPG) REFERENCES LOAIPHONG(LoaiPG),
+)
+create table DATPHONG(
+	SoDP int NOT NULL,
+	SoPG int NOT NULL,
+	LoaiPG char(1) NOT NULL CHECK (LoaiPG IN ('1','2','3')),
+	SoCC char(12) NOT NULL,
+	NgayDat date NOT NULL,
+	CachDat char(1) NOT NULL CHECK (CachDat IN ('A', 'C', 'S', 'V')),
+	NgayDen date NOT NULL,
+	NgayDi date NOT NULL,
+	CONSTRAINT PK_DATPHONG PRIMARY KEY (SoDP),
+	CONSTRAINT FK_DATPHONG_PHONG FOREIGN KEY (SoPG) REFERENCES PHONG(SoPG),
+	CONSTRAINT FK_DATPHONG_LOAIPHONG FOREIGN KEY (LoaiPG) REFERENCES LOAIPHONG(LoaiPG),
+	CONSTRAINT FK_DATPHONG_KHACHLUUTRU FOREIGN KEY (SoCC) REFERENCES KHACHLUUTRU(SoCC),
+);
+
+INSERT INTO LOAIPHONG(LoaiPG,DonGia,SoGiuong,KieuGiuong)
+VALUES
+(1,	950000,	1,	2),
+(2,	800000,	2,	1),
+(3,	700000,	2,	1);
+GO
+--INSERT INTO PHONG
+INSERT INTO PHONG(SoPG,LoaiPG,ViTri)
+VALUES
+(100,	1,	1),
+(101,	2,	2),
+(102,	3,	3);
+GO
+--INSERT INTO KHACHLUUTRU
+--INSERT INTO KHACHLUUTRU  
+INSERT INTO KHACHLUUTRU(SoCC, Ho, Ten, NgaySinh, SoDT)  
+VALUES  
+('51069001234', 'Le Van', 'Tho', '1969-12-01', '332089600'),  
+('51175002342', 'Nguyen Thi', 'Hau', '1975-03-20', '985984434');  
+GO  
+
+--INSERT INTO DATPHONG  
+INSERT INTO DATPHONG(SoDP, SoPG, LoaiPG, SoCC, NgayDat, CachDat, NgayDen, NgayDi)  
+VALUES  
+(1, 101, '1', '51069001234', '2024-03-01', 'S', '2024-04-28', '2024-04-30'),  
+(2, 102, '3', '51175002342', '2024-04-10', 'V', '2024-04-10', '2024-04-11');  
+GO
+
+select * from DATPHONG;
+UPDATE DATPHONG
+SET 
+    NgayDen = DATEADD(DAY, 10, NgayDen),
+    NgayDi = DATEADD(DAY, 10, NgayDi)
+WHERE SoCC = '51069001234';
+select * from DATPHONG;
+DELETE FROM DATPHONG
+WHERE SoCC IN (
+    SELECT SoCC
+    FROM KHACHLUUTRU
+    WHERE SoDT = '985984434'
+);
+select * from DATPHONG;
