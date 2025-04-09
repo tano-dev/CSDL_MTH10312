@@ -1,53 +1,47 @@
 ﻿-- Mssv: 23110163
 -- Ho ten: Nguyen Van Phuc Huy
 -- RDBMS: SQL Server
+create database csdl_khachsan;
+Go
+use csdl_khachsan;
 
-CREATE DATABASE csdl_khachsan;
-GO
-USE csdl_khachsan;
-
---CREATE TABLE KHACHLUUTRU
-CREATE TABLE KHACHLUUTRU (
-    SoCC			CHAR(12)		NOT NULL	PRIMARY KEY,         
-    Ho				VARCHAR(30)		NOT NULL,                              
-    Ten				VARCHAR(15)		NOT NULL,                    
-    NgaySinh		DATE,                               
-    SoDT			CHAR(10)		NOT NULL                       
+create table KHACHLUUTRU(
+	SoCC char(12) NOT NULL,
+	Ho varchar(30) NOT NULL,
+	Ten varchar(15) NOT NULL,
+	NgaySinh date,
+	SoDT char(10) NOT NULL,
+	CONSTRAINT PK_KHACHLUUTRU PRIMARY KEY (SoCC),
+);
+create table LOAIPHONG(
+	LoaiPG char(1) NOT NULL CHECK (LoaiPG IN ('1','2','3')),
+	DonGia decimal(10,2) NOT NULL,
+	SoGiuong int NOT NULL CHECK (SoGiuong BETWEEN 1 AND 3),
+	KieuGiuong int NOT NULL CHECK (KieuGiuong IN (1, 2)),
+	CONSTRAINT PK_LOAIPHONG PRIMARY KEY (LoaiPG),
+);
+create table PHONG(
+	SoPG int NOT NULL,
+	LoaiPG char(1) NOT NULL CHECK (LoaiPG IN ('1','2','3')),
+	ViTri int NOT NULL CHECK (ViTri IN (1, 2, 3)),
+	CONSTRAINT PK_PHONG PRIMARY KEY (SoPG),
+	CONSTRAINT FK_PHONG_LOAIPHONG FOREIGN KEY (LoaiPG) REFERENCES LOAIPHONG(LoaiPG),
+)
+create table DATPHONG(
+	SoDP int NOT NULL,
+	SoPG int NOT NULL,
+	LoaiPG char(1) NOT NULL CHECK (LoaiPG IN ('1','2','3')),
+	SoCC char(12) NOT NULL,
+	NgayDat date NOT NULL,
+	CachDat char(1) NOT NULL CHECK (CachDat IN ('A', 'C', 'S', 'V')),
+	NgayDen date NOT NULL,
+	NgayDi date NOT NULL,
+	CONSTRAINT PK_DATPHONG PRIMARY KEY (SoDP),
+	CONSTRAINT FK_DATPHONG_PHONG FOREIGN KEY (SoPG) REFERENCES PHONG(SoPG),
+	CONSTRAINT FK_DATPHONG_LOAIPHONG FOREIGN KEY (LoaiPG) REFERENCES LOAIPHONG(LoaiPG),
+	CONSTRAINT FK_DATPHONG_KHACHLUUTRU FOREIGN KEY (SoCC) REFERENCES KHACHLUUTRU(SoCC),
 );
 
---CREATE TABLE LOAIPHONG
-CREATE TABLE LOAIPHONG(
-	LoaiPG			CHAR(1)			NOT NULL	CHECK (LoaiPG IN ('1','2','3') )		PRIMARY KEY,
-	DonGia			DECIMAL(10,2)	NOT NULL,
-	SoGiuong		INT				NOT NULL	CHECK (SoGiuong BETWEEN 1 AND 3), 
-	KieuGiuong		INT				NOT NULL	CHECK (KieuGiuong IN (1, 2))
-);
-
---CREATE TABLE PHONG
-CREATE TABLE PHONG(
-	SoPG			INT				NOT NULL	PRIMARY KEY,              
-    LoaiPG			CHAR(1)			NOT NULL	CHECK (LoaiPG IN ('1','2','3') ),                     
-    ViTri			INT				NOT NULL	CHECK (ViTri IN (1, 2, 3)),
-    FOREIGN KEY (LoaiPG) REFERENCES LOAIPHONG(LoaiPG)
-);
-
---CREATE TABLE DATPHONG
-CREATE TABLE DATPHONG(	
-	SoDP			INT				NOT NULL	PRIMARY KEY,              
-    SoPG			INT				NOT NULL,                           
-    LoaiPG			CHAR(1)			NOT NULL	CHECK (LoaiPG IN ('1','2','3') ),                    
-    SoCC			CHAR(12)		NOT NULL,                     
-    NgayDat			DATE			NOT NULL,                                -- Ngày đặt
-    CachDat			CHAR(1)			NOT NULL	CHECK (CachDat IN ('A', 'C', 'S', 'V')),
-    NgayDen			DATE			NOT NULL,                               
-    NgayDi			DATE			NOT NULL,                        
-    FOREIGN KEY (SoPG) REFERENCES PHONG(SoPG),
-    FOREIGN KEY (LoaiPG) REFERENCES LOAIPHONG(LoaiPG),
-    FOREIGN KEY (SoCC) REFERENCES KHACHLUUTRU(SoCC)
-);
-
---=============================
---INSERT INTO LOAIPHONG
 INSERT INTO LOAIPHONG(LoaiPG,DonGia,SoGiuong,KieuGiuong)
 VALUES
 (1,	950000,	1,	2),
@@ -75,7 +69,7 @@ VALUES
 (1, 101, '1', '51069001234', '2024-03-01', 'S', '2024-04-28', '2024-04-30'),  
 (2, 102, '3', '51175002342', '2024-04-10', 'V', '2024-04-10', '2024-04-11');  
 GO
-GO
+
 select * from DATPHONG;
 UPDATE DATPHONG
 SET 
