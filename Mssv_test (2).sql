@@ -2,6 +2,6 @@
 -- Ho ten: Nguyen Van Phuc Huy
 -- RDBMS: SQL Server
 
-create database a;
+create database csdl;
 go
-use csdl a;
+use csdl;
