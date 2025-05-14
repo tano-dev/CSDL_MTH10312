@@ -334,11 +334,16 @@ from nhanvien
 join thannhan on nhanvien.manv = thannhan.manv
 where (nhanvien.dem = thannhan.tentn or nhanvien.honv = thannhan.tentn or nhanvien.tennv = thannhan.tentn)  and nhanvien.gioitinh = thannhan.gioitinh;
 --Cau 18
-
-select nhanvien.honv, nhanvien.dem, nhanvien.tennv, thamgia.mada
+SELECT 
+honv + 
+case
+	when dem is null then '' else ' ' + dem + ' ' 
+end +
+tennv as 'Ho ten',
+mapb,
+mada
 from nhanvien
-join thamgia on thamgia.manv = nhanvien.manv
-join duan on thamgia.mada = duan.mada
+join thamgia on nhanvien.manv = thamgia.manv
 order by nhanvien.mapb, nhanvien.honv, nhanvien.dem;
 --Cau 19
 select phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien', max(nhanvien.luong) as 'Muc luong cao nhat', min(nhanvien.luong) as 'Muc luong thap nhat', avg(nhanvien.luong) as 'Muc luong trung binh'
@@ -357,5 +362,168 @@ from phongban
 join nhanvien on phongban.mapb = nhanvien.mapb
 group by phongban.mapb;
 --Cau 22
+select duan.mada, count(thamgia.manv) as 'Tong so nhan vien'
+from duan
+join thamgia on thamgia.mada = duan.mada
+group by duan.mada;
+--Cau 23
+select duan.mada, count(thamgia.manv) as 'Tong so nhan vien'
+from duan
+ group by duan.mada
+having count(thamgia.manv) > 2;
+--Cau 24
+select nhanvien.mapb, phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien'
+from nhanvien 
+join phongban on nhanvien.mapb = phongban.mapb
+group by nhanvien.mapb, phongban.tenpb
+having count(nhanvien.manv) > 3;
+--Cau 25
+select duan.mada, count(thamgia.manv) as 'Tong so nhan vien'
+from duan
+join thamgia on thamgia.mada = duan.mada
+group by duan.mada;
+--Cau 26
+
+/*
 
 
+Gom nhóm, sắp xếp, kết ngoài 
+18. Cho biết họ tên, mã phòng làm việc của các nhân viên và mã số các dự án 
+mà họ tham gia, sắp xếp tăng dần theo mã phòng, trong mỗi phòng sắp xếp 
+theo họ, tên với thứ tự alphabe. 
+19. Cho biết tổng số nhân viên, mức lương cao nhất, mức lương thấp nhất và 
+mức lương trung bình của phòng “Nghien cuu”. 
+20. Với mỗi phòng, cho biết mã số phòng và tổng số nhân viên của phòng đó. 
+21. Với mỗi phòng, cho biết mã số phòng và mức lương trung bình của các 
+nhân viên của phòng đó. 
+22. Với mỗi dự án có nhân viên tham gia, cho biết mã số, tên và tổng số nhân 
+viên tham gia của dự án đó. 
+23. Cho biết mã số, tên và tổng số nhân viên tham gia của dự án có nhiều hơn 2 
+nhân viên tham gia. 
+
+
+*/
+/*18. Cho biết họ tên, mã phòng làm việc của các nhân viên và mã số các dự án 
+mà họ tham gia, sắp xếp tăng dần theo mã phòng, trong mỗi phòng sắp xếp 
+theo họ, tên với thứ tự alphabe. */
+SELECT nhanvien.honv, nhanvien.dem, nhanvien.tennv, nhanvien.mapb, thamgia.mada
+from nhanvien
+join thamgia on nhanvien.manv = thamgia.manv
+order by nhanvien.mapb, nhanvien.honv, nhanvien.dem;
+/*19. Cho biết tổng số nhân viên, mức lương cao nhất, mức lương thấp nhất và
+mức lương trung bình của phòng “Nghien cuu”. */
+SELECT phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien', max(nhanvien.luong) as 'Muc luong cao nhat', min(nhanvien.luong) as 'Muc luong thap nhat', avg(nhanvien.luong) as 'Muc luong trung binh'
+from phongban
+join nhanvien on phongban.mapb = nhanvien.mapb
+where phongban.tenpb = 'Nghien cuu'
+group by phongban.tenpb;
+/*20. Với mỗi phòng, cho biết mã số phòng và tổng số nhân viên của phòng đó. */         
+
+SELECT phongban.mapb, count(nhanvien.manv) as 'Tong so nhan vien'
+from phongban
+join nhanvien on phongban.mapb = nhanvien.mapb
+group by phongban.mapb;
+/*21. Với mỗi phòng, cho biết mã số phòng và mức lương trung bình của các
+ nhân viên của phòng đó. */
+ SELECT phongban.mapb, avg(nhanvien.luong) as 'Muc luong trung binh'
+ from phongban
+ join nhanvien on phongban.mapb = nhanvien.mapb
+ group by phongban.mapb;
+ /*22. Với mỗi dự án có nhân viên tham gia, cho biết mã số, tên và tổng số nhân
+ viên tham gia của dự án đó. */
+ SELECT duan.mada, count(thamgia.manv) as 'Tong so nhan vien'
+ from duan
+ join thamgia on thamgia.mada = duan.mada
+ group by duan.mada
+ having count(thamgia.manv) > 0;		
+ /*23. Cho biết mã số, tên và tổng số nhân viên tham gia của dự án có nhiều hơn 2
+ nhân viên tham gia. */
+SELECT duan.mada, duan.tenda ,count(thamgia.manv) as 'Tong so nhan vien'
+from duan
+join thamgia on thamgia.mada = duan.mada
+group by duan.mada,duan.tenda
+having count(thamgia.manv) > 2;
+ /*24. Cho biết mã số, tên và tổng số nhân viên của các phòng có nhiều hơn 5
+ nhân viên. */
+
+ SELECT phongban.mapb, phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien'
+ from phongban
+ join nhanvien on phongban.mapb = nhanvien.mapb
+ group by phongban.mapb, phongban.tenpb
+ having count(nhanvien.manv) > 5;
+ /*25. Với mỗi dự án, cho biết mã số, tên và tổng số nhân viên tham gia của dự án
+ đó. */
+ SELECT duan.mada, duan.tenda, count(thamgia.manv) as 'Tong so nhan vien'
+ from duan
+ join thamgia on thamgia.mada = duan.mada
+ group by duan.mada, duan.tenda;
+ /*26. Với mỗi dự án, cho biết mã số, tên và tổng số nhân viên thuộc phòng số 5
+ tham gia của dự án đó. */
+
+ SELECT duan.mada, duan.tenda, count(thamgia.manv) as 'Tong so nhan vien'
+ from duan
+ join thamgia on thamgia.mada = duan.mada
+ join nhanvien on thamgia.manv = nhanvien.manv
+ where nhanvien.mapb = 5
+ group by duan.mada, duan.tenda
+ having count(thamgia.manv) > 0;
+ /*27. Với mỗi nhân viên, cho biết họ tên và tổng số người thân của nhân viên đó. */
+ SELECT nhanvien.honv, nhanvien.dem, nhanvien.tennv, count(thannhan.tentn) as 'Tong so nguoi than'
+ from nhanvien
+ join thannhan on nhanvien.manv = thannhan.manv
+ group by nhanvien.honv, nhanvien.dem, nhanvien.tennv;
+ /*28. Với mỗi phòng có mức lương trung bình lớn hơn 30,000, cho biết tên
+ phòng và tổng số nhân viên của phòng đó. */
+ select phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien'
+ from phongban
+ join nhanvien on phongban.mapb = nhanvien.mapb
+ group by phongban.tenpb
+ having avg(nhanvien.luong) > 30000;
+
+ /*
+ Truy vấn lồng 
+29. Cho biết tên các dự án có nhân viên tham gia mang họ “Nguyen” hoặc 
+người trưởng phòng điều phối mang họ “Nguyen”. 
+30. Với mỗi phòng có mức lương trung bình lớn hơn 30,000, cho biết tên 
+phòng và tổng số nhân viên nữ của phòng đó. 
+31. Cho biết họ tên các nhân viên có trên 2 người thân. 
+32. Cho biết họ tên các nhân viên không có người thân nào. 
+33. Cho biết họ tên các trưởng phòng có ít nhất một người thân. 
+34. Cho biết họ tên các nhân viên có mức lương trên mức lương trung bình của 
+phòng “Nghien cuu”. 
+35. Cho biết tên phòng và họ tên trưởng phòng của phòng có đông nhân viên 
+nhất. 
+36. Cho biết họ tên và địa chỉ các nhân viên làm việc cho một dự án ở “Phu	
+Nhuan” nhưng phòng mà họ làm việc lại không có trụ sở ở “Phu Nhuan”. 
+37. Cho biết họ tên các nhân viên tham gia tất cả các dự án công ty. 
+38. Cho biết họ tên các nhân viên tham gia tất cả các dự án do phòng số 5 điều 
+phối.
+*/
+-- Cau 29
+select distinct duan.tenda
+from duan
+join thamgia on thamgia.mada = duan.mada
+join nhanvien on thamgia.manv = nhanvien.manv
+where nhanvien.honv = 'Nguyen' or duan.mapb in (select phongban.mapb from phongban where phongban.maql = nhanvien.manv);
+-- Cau 30
+select phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien nu'
+from phongban
+join nhanvien on phongban.mapb = nhanvien.mapb
+where nhanvien.gioitinh = 'F' or nhanvien.gioitinh = 'f'
+group by phongban.tenpb
+having avg(nhanvien.luong) > 30000;
+-- Cau 31
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv, count(thannhan.tentn) as 'Tong so nguoi than'
+from nhanvien
+join thannhan on nhanvien.manv = thannhan.manv
+group by nhanvien.honv, nhanvien.dem, nhanvien.tennv
+having count(thannhan.tentn) > 2;
+-- Cau 32
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv
+from nhanvien
+left join thannhan on nhanvien.manv = thannhan.manv
+where thannhan.tentn is null;
+-- Cau 33
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv
+from nhanvien
+join phongban on phongban.mapb = nhanvien.mapb
