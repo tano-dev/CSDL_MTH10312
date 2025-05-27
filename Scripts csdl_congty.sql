@@ -526,4 +526,64 @@ where thannhan.tentn is null;
 -- Cau 33
 select nhanvien.honv, nhanvien.dem, nhanvien.tennv
 from nhanvien
-join phongban on phongban.mapb = nhanvien.mapb
+join phongban on phongban.maql = nhanvien.manv
+join thannhan on nhanvien.manv = thannhan.manv
+group by nhanvien.honv, nhanvien.dem, nhanvien.tennv
+having count(thannhan.tentn) > 0;
+-- Cau 34
+select nhanvien.honv, nhanvien.dem, nhanvien.tennv
+from nhanvien
+where nhanvien.luong > (select avg(nhanvien.luong) from phongban join nhanvien on phongban.mapb = nhanvien.mapb where phongban.tenpb = 'Nghien cuu');
+-- Cau 35
+select phongban.tenpb, nhanvien.honv, nhanvien.dem, nhanvien.tennv
+from phongban
+
+-- Cau 36
+join nhanvien on phongban.mapb = nhanvien.mapb
+where phongban.truso not like '%Phu Nhuan%' and nhanvien.manv in (select thamgia.manv from thamgia join duan on thamgia.mada = duan.mada where duan.diadiem like '%Phu Nhuan%');
+select phongban.tenpb, nhanvien.honv, nhanvien.dem, nhanvien.tennv
+from phongban
+join nhanvien on phongban.mapb = nhanvien.mapb
+where phongban.truso not like '%Phu Nhuan%' and nhanvien.manv in (select thamgia.manv from thamgia join duan on thamgia.mada = duan.mada where duan.diadiem like '%Phu Nhuan%');
+
+
+
+
+
+
+--Revision
+--cau 1
+select nhanvien.manv, CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as HoTen,nhanvien.ngaysinh
+from nhanvien
+where nhanvien.mapb = 4;
+--cau 2
+select *
+from nhanvien
+where nhanvien.luong > 30000;
+--cau 3
+select * 
+from nhanvien
+where (nhanvien.luong > 25000 and mapb = 4) or (luong > 30000 and mapb = 5);
+--cau 4
+select CONCAT(honv,' ',dem,' ',tennv) as HoTen, ngaysinh, diachi
+from nhanvien
+where diachi like '%TpHCM%';
+--cau 5
+select nhanvien.ngaysinh, nhanvien.diachi
+from nhanvien
+where honv = 'Nguyen' and dem = 'Bao' and tennv = 'Hung';
+--cau 6
+select * from nhanvien
+where diachi like '%Phu Nhuan%';
+--cau 7
+select * from nhanvien
+where YEAR(ngaysinh) between 1950 and 1959;
+--cau 8
+select distinct luong from nhanvien;
+--cau 9
+select * from nhanvien
+where mags is NULL;
+--cau 10
+select phongban.tenpb,truso_phong.truso from phongban
+join truso_phong on truso_phong.mapb = phongban.mapb;
+--cau 11
