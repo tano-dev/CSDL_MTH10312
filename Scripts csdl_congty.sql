@@ -328,6 +328,14 @@ from nhanvien
 join thamgia on thamgia.manv = nhanvien.manv
 join duan on thamgia.mada = duan.mada
 where duan.tenda = 'San pham X';
+SELECT nv.MaNV, CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen,
+       nv.Luong * 1.1 AS LuongMoi
+FROM NHANVIEN nv
+WHERE nv.MaNV IN (
+    SELECT MaNV FROM THAMGIA WHERE MaDA = (
+        SELECT MaDA FROM DUAN WHERE TenDA = 'San pham X'
+    )
+);
 --Cau 17
 select nhanvien.honv, nhanvien.dem, nhanvien.tennv, thannhan.tentn
 from nhanvien
@@ -345,6 +353,11 @@ mada
 from nhanvien
 join thamgia on nhanvien.manv = thamgia.manv
 order by nhanvien.mapb, nhanvien.honv, nhanvien.dem;
+SELECT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen,
+       nv.MaPB, tg.MaDA
+FROM NHANVIEN nv
+JOIN THAMGIA tg ON nv.MaNV = tg.MaNV
+ORDER BY nv.MaPB, nv.HoNV, nv.Dem, nv.TenNV;
 --Cau 19
 select phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien', max(nhanvien.luong) as 'Muc luong cao nhat', min(nhanvien.luong) as 'Muc luong thap nhat', avg(nhanvien.luong) as 'Muc luong trung binh'
 from phongban
@@ -369,14 +382,26 @@ group by duan.mada;
 --Cau 23
 select duan.mada, count(thamgia.manv) as 'Tong so nhan vien'
 from duan
- group by duan.mada
+join thamgia on thamgia.mada = duan.mada
+group by duan.mada
 having count(thamgia.manv) > 2;
 --Cau 24
 select nhanvien.mapb, phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien'
 from nhanvien 
 join phongban on nhanvien.mapb = phongban.mapb
 group by nhanvien.mapb, phongban.tenpb
-having count(nhanvien.manv) > 3;
+having count(nhanvien.manv) > 5;
+SELECT MaPB, COUNT(*) AS TongNV
+FROM NHANVIEN
+GROUP BY MaPB
+HAVING COUNT(*) > 5;
+select manv,tennv,count(*)
+from nhanvien
+join phongban
+on nhanvien.mapb=phongban.mapb
+group by manv,tennv-- nếu trùng thì gộp lại
+having count(*)>5;
+
 --Cau 25
 select duan.mada, count(thamgia.manv) as 'Tong so nhan vien'
 from duan
@@ -499,12 +524,87 @@ Nhuan” nhưng phòng mà họ làm việc lại không có trụ sở ở “P
 38. Cho biết họ tên các nhân viên tham gia tất cả các dự án do phòng số 5 điều 
 phối.
 */
+-- 33. Họ tên trưởng phòng có ít nhất một người thân
+SELECT DISTINCT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS TruongPhong
+FROM PHONGBAN pb
+JOIN NHANVIEN nv ON pb.MaQL = nv.MaNV
+JOIN THANNHAN tn ON nv.MaNV = tn.MaNV;
+
+-- 34. NV có lương > lương TB phòng 'Nghien cuu'
+SELECT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen
+FROM NHANVIEN nv
+WHERE nv.Luong > (
+    SELECT AVG(nv2.Luong)
+    FROM NHANVIEN nv2
+    JOIN PHONGBAN pb2 ON nv2.MaPB = pb2.MaPB
+    WHERE pb2.TenPB = 'Nghien cuu'
+);
+
+-- 35. Tên phòng và họ tên trưởng phòng của phòng đông NV nhất
+SELECT pb.TenPB, CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS TruongPhong
+FROM PHONGBAN pb
+JOIN NHANVIEN nv ON pb.MaQL = nv.MaNV
+WHERE pb.MaPB = (
+    SELECT	TOP 1 MaPB
+    FROM NHANVIEN
+    GROUP BY MaPB
+    ORDER BY COUNT(*) DESC
+);
+
+-- 36. NV tham gia dự án ở 'Phu Nhuan' nhưng PB họ làm việc không có trụ sở ở 'Phu Nhuan'
+SELECT DISTINCT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen, nv.DiaChi
+FROM NHANVIEN nv
+JOIN THAMGIA tg ON nv.MaNV = tg.MaNV
+JOIN DUAN d ON tg.MaDA = d.MaDA
+WHERE d.DiaDiem = 'Phu Nhuan'
+  AND nv.MaPB NOT IN (
+    SELECT MaPB FROM TRUSO_PHONG WHERE TruSo = 'Phu Nhuan'
+);
+
+-- 37. NV tham gia tất cả các dự án công ty
+SELECT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen
+FROM NHANVIEN nv
+WHERE NOT EXISTS (
+    SELECT d.MaDA FROM DUAN d
+    WHERE NOT EXISTS (
+        SELECT * FROM THAMGIA tg WHERE tg.MaNV = nv.MaNV AND tg.MaDA = d.MaDA
+    )
+);
+
+-- 38. NV tham gia tất cả các dự án do PB5 điều phối
+SELECT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen
+FROM NHANVIEN nv
+WHERE NOT EXISTS (
+    SELECT d.MaDA FROM DUAN d WHERE d.MaPB = 5
+      AND NOT EXISTS (
+            SELECT * FROM THAMGIA tg WHERE tg.MaNV = nv.MaNV AND tg.MaDA = d.MaDA
+      )
+);
+
 -- Cau 29
 select distinct duan.tenda
 from duan
 join thamgia on thamgia.mada = duan.mada
 join nhanvien on thamgia.manv = nhanvien.manv
 where nhanvien.honv = 'Nguyen' or duan.mapb in (select phongban.mapb from phongban where phongban.maql = nhanvien.manv);
+SELECT DISTINCT d.TenDA
+FROM DUAN d
+JOIN THAMGIA tg ON d.MaDA = tg.MaDA
+JOIN NHANVIEN nv ON tg.MaNV = nv.MaNV
+WHERE nv.HoNV = 'Nguyen'
+UNION
+SELECT DISTINCT d.TenDA
+FROM DUAN d
+JOIN PHONGBAN pb ON d.MaPB = pb.MaPB
+JOIN NHANVIEN tr ON pb.MaQL = tr.MaNV
+WHERE tr.HoNV = 'Nguyen';
+SELECT DISTINCT d.TenDA
+FROM DUAN d
+LEFT JOIN THAMGIA tg ON d.MaDA = tg.MaDA
+LEFT JOIN NHANVIEN nv ON tg.MaNV = nv.MaNV
+LEFT JOIN PHONGBAN pb ON d.MaPB = pb.MaPB
+LEFT JOIN NHANVIEN tr ON pb.MaQL = tr.MaNV
+WHERE nv.HoNV = 'Nguyen' OR tr.HoNV = 'Nguyen';
 -- Cau 30
 select phongban.tenpb, count(nhanvien.manv) as 'Tong so nhan vien nu'
 from phongban
@@ -512,6 +612,11 @@ join nhanvien on phongban.mapb = nhanvien.mapb
 where nhanvien.gioitinh = 'F' or nhanvien.gioitinh = 'f'
 group by phongban.tenpb
 having avg(nhanvien.luong) > 30000;
+SELECT pb.TenPB, COUNT(nv.MaNV) AS SoNV_Nu
+FROM PHONGBAN pb
+JOIN NHANVIEN nv ON pb.MaPB = nv.MaPB AND nv.GioiTinh IN ('f','F')
+GROUP BY pb.TenPB
+HAVING AVG(nv.Luong) > 30000;
 -- Cau 31
 select nhanvien.honv, nhanvien.dem, nhanvien.tennv, count(thannhan.tentn) as 'Tong so nguoi than'
 from nhanvien
@@ -587,3 +692,189 @@ where mags is NULL;
 select phongban.tenpb,truso_phong.truso from phongban
 join truso_phong on truso_phong.mapb = phongban.mapb;
 --cau 11
+select phongban.tenpb, CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from phongban
+join nhanvien on nhanvien.manv = phongban.maql;
+--cau 12
+select  CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten,thannhan.tentn
+from nhanvien
+join thannhan on thannhan.manv = nhanvien.manv
+where nhanvien.gioitinh = 'f' or nhanvien.gioitinh = 'F';
+--cau 13
+select nhanvien.tennv, nhanvien.diachi
+from nhanvien
+join phongban on phongban.mapb = nhanvien.mapb
+where phongban.tenpb = 'Nghien Cuu'
+--cau 14
+select duan.mada, phongban.tenpb, CONCAT(nhanvien.honv,' ', nhanvien.dem,' ',nhanvien.tennv) as hoten, nhanvien.ngaysinh
+from duan
+join phongban on phongban.mapb = duan.mapb
+join nhanvien on nhanvien.manv = phongban.maql
+where duan.diadiem like '%Go Vap%';
+--cau 15
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten, CONCAT(nhanvien2.honv,' ',nhanvien2.dem,' ',nhanvien2.tennv) as hoten_gs
+from nhanvien
+join nhanvien nhanvien2 on nhanvien.mags = nhanvien2.manv;
+--cau 16
+select nhanvien.manv,nhanvien.luong as luong_old, nhanvien.luong*1.1 as luong_new
+from nhanvien
+join thamgia on thamgia.manv = nhanvien.manv
+join duan on duan.mada = thamgia.mada
+where duan.tenda = 'San pham X';
+--cau 17
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hotennv, thannhan.tentn 
+from nhanvien
+join thannhan on thannhan.manv = nhanvien.manv
+where nhanvien.tennv = thannhan.tentn and nhanvien.gioitinh = thannhan.gioitinh;
+--cau 18
+select CONCAT(nhanvien.honv, ' ',nhanvien.dem,' ',nhanvien.tennv) as hoten, nhanvien.mapb,thamgia.mada
+from nhanvien
+join thamgia on thamgia.manv = nhanvien.manv
+order by nhanvien.mapb, hoten asc;
+--cau 19
+select COUNT(nhanvien.manv) as tongNV, MAX(nhanvien.luong) as maxLuong, MIN(nhanvien.luong) as minLuong, AVG(nhanvien.luong) as avgLuong
+from nhanvien
+join phongban on phongban.mapb = nhanvien.mapb
+where phongban.tenpb = 'Nghien cuu';
+--cau 20
+select phongban.mapb, COUNT(nhanvien.manv) as tongNV
+from phongban
+join nhanvien on nhanvien.mapb = phongban.mapb
+group by phongban.mapb;
+--cau 21
+select phongban.mapb, AVG(nhanvien.luong) as luongAVG
+from phongban
+join nhanvien on nhanvien.mapb = phongban.mapb
+group by phongban.mapb
+--cau 22
+select duan.mada, duan.tenda, COUNT(nhanvien.manv)
+from duan
+join thamgia on thamgia.mada = duan.mada
+join nhanvien on thamgia.manv = nhanvien.manv
+group by duan.mada, duan.tenda;
+--cau 23
+select duan.mada, duan.tenda, COUNT(nhanvien.manv)
+from duan
+join thamgia on thamgia.mada = duan.mada
+join nhanvien on thamgia.manv = nhanvien.manv
+group by duan.mada, duan.tenda
+having COUNT(nhanvien.manv) > 2;
+--cau 24
+select phongban.mapb,phongban.tenpb, COUNT(thamgia.manv)
+from phongban
+join duan on duan.mapb = phongban.mapb
+join thamgia on thamgia.mada = duan.mada
+group by phongban.mapb,phongban.tenpb
+having COUNT(thamgia.manv) > 5;
+--cau 25
+SELECT d.MaDA, d.TenDA, COUNT(tg.MaNV) AS SoNV
+FROM DUAN d
+LEFT JOIN THAMGIA tg ON d.MaDA = tg.MaDA
+GROUP BY d.MaDA, d.TenDA;
+--cau 26
+select duan.mada, duan.tenda, COUNT(nhanvien.manv)
+from duan
+join thamgia on thamgia.mada = duan.mada
+join nhanvien on thamgia.manv = nhanvien.manv
+where nhanvien.mapb = 5
+group by duan.mada, duan.tenda;
+--cau 27
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten, COUNT(thannhan.manv)
+from nhanvien
+join thannhan on thannhan.manv = nhanvien.manv
+group by nhanvien.honv, nhanvien.dem, nhanvien.tennv;
+--cau 28
+select phongban.tenpb, COUNT(nhanvien.manv)
+from phongban
+join nhanvien on nhanvien.mapb = phongban.mapb
+group by phongban.tenpb
+having AVG(nhanvien.luong) > 30000;
+--cau 29
+select duan.tenda
+from duan
+join thamgia on thamgia.mada = duan.mada
+join nhanvien on nhanvien.manv = thamgia.manv
+where (nhanvien.honv = 'Nguyen') or duan.mada in (
+select phongban.mapb from phongban
+join duan duan1 on duan1.mapb = phongban.mapb
+join nhanvien nhanvien1 on nhanvien1.manv = phongban.maql
+where duan.mapb = duan1.mapb and nhanvien1.honv = 'Nguyen'
+);
+--cau 30
+select phongban.tenpb, COUNT(nhanvien.manv)
+from phongban
+join nhanvien on nhanvien.mapb = phongban.mapb
+where nhanvien.gioitinh = 'f' or nhanvien.gioitinh = 'F'
+group by phongban.tenpb
+having avg(nhanvien.luong) > 30000;
+--cau 31
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from nhanvien
+join thannhan on thannhan.manv = nhanvien.manv
+group by honv,dem,tennv
+having COUNT(thannhan.tentn) > 2;
+--cau 32
+SELECT CONCAT(nv.HoNV,' ',nv.Dem,' ',nv.TenNV) AS HoTen
+FROM NHANVIEN nv
+LEFT JOIN THANNHAN tn ON nv.MaNV = tn.MaNV
+GROUP BY nv.MaNV, nv.HoNV, nv.Dem, nv.TenNV
+HAVING COUNT(tn.TenTN) = 0;
+--cau 33
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from nhanvien
+join phongban on phongban.maql = nhanvien.manv
+join thannhan on thannhan.manv = nhanvien.manv
+group by honv,dem,tennv
+having COUNT(thannhan.tentn) > 0;
+--cau 34
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from nhanvien
+where nhanvien.luong > (
+select AVG(nv2.luong) 
+from nhanvien nv2
+join phongban on phongban.mapb = nv2.mapb
+where phongban.tenpb = 'Nghien cuu'
+);
+--cau 35
+select phongban.tenpb, CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from phongban
+join nhanvien on nhanvien.manv = phongban.maql
+where phongban.mapb in (
+select top 1 phongban.mapb
+from phongban
+join nhanvien on nhanvien.mapb = phongban.mapb
+group by phongban.mapb
+order by COUNT(*) desc)
+--cau 36
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten, nhanvien.diachi
+from nhanvien
+join thamgia on thamgia.manv = nhanvien.manv
+join duan on duan.mada = thamgia.mada
+where nhanvien.manv not in (
+select nv2.manv
+from nhanvien nv2
+join phongban pb2 on pb2.mapb = nv2.mapb
+join truso_phong ts on ts.mapb = pb2.mapb
+where ts.truso = 'Phu Nhuan'
+) and duan.diadiem = 'Phu Nhuan';
+--Cau 37
+select CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from nhanvien
+join thamgia on thamgia.manv = nhanvien.manv
+join  duan on duan.mada = thamgia.mada
+group by honv,dem,tennv
+having count(duan.mada) = (select COUNT(da2.mada) from duan da2);
+--Cau 38
+select distinct CONCAT(nhanvien.honv,' ',nhanvien.dem,' ',nhanvien.tennv) as hoten
+from nhanvien
+join thamgia on thamgia.manv = nhanvien.manv
+where nhanvien.manv in (
+select nv2.manv 
+from nhanvien nv2
+join phongban on phongban.mapb = nhanvien.mapb
+join duan on duan.mapb = phongban.mapb
+where duan.mapb = 5
+);
+
+
+
