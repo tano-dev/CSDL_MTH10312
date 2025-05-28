@@ -516,3 +516,231 @@ WHERE cv.TongGiaTri > (
         GROUP BY sp1.MaDanhMuc
     ) AS t
 );
+
+
+use csdl_quanlykho
+go
+
+-- 1/ Lập danh sách mã số, tên và số lượng tồn kho của tất cả các sản phẩm có số lượng tồn kho dưới 100.
+SELECT SP.MaSanPham, SP.TenSanPham, TK.SoLuong
+FROM TON_KHO AS TK
+JOIN SAN_PHAM AS SP ON SP.MaSanPham = TK.MaSanPham
+WHERE TK.SoLuong <100
+GO
+
+-- 2/ Lập danh sách các đơn nhập hàng đã nhận từ nhà cung cấp Sieu thi Sach.
+SELECT *
+FROM DON_NHAP_HANG AS DNH
+JOIN NHA_CUNG_CAP AS NCC ON DNH.MaNhaCungCap = NCC.MaNhaCungCap
+WHERE NCC.TenNhaCungCap = 'Sieu thi Sach' AND DNH.TrangThai = 'R'
+GO
+
+-- 3/ Lập danh sách mã số, tên và số lượng các sản phẩm thuộc danh mục Dien tu có số lượng tại kho WH001 lớn hơn 50 đơn vị.
+SELECT TK.MaSanPham, TK.SoLuong, SP.TenSanPham
+FROM SAN_PHAM AS SP
+JOIN TON_KHO AS TK ON TK.MaSanPham = SP.MaSanPham
+JOIN DANH_MUC AS DM ON DM.MaDanhMuc = SP.MaDanhMuc
+WHERE TK.MAKHO = 'WH001' AND TK.SoLuong > 50 AND  DM.TenDanhMuc = 'Dien tu'
+GO
+
+-- 4/ Lập danh sách mã số, tên, mã danh mục của các sản phẩm trong kho WH002 có số lượng trên 50, sắp xếp theo số lượng giảm dần.
+SELECT SP.MaSanPham, SP.TenSanPham, SP.MaDanhMuc
+FROM SAN_PHAM AS SP
+JOIN TON_KHO AS TK ON TK.MaSanPham = SP.MaSanPham 
+WHERE TK.MaKho = 'WH002' AND SP.SoLuongTon > 50
+ORDER BY SP.SoLuongTon DESC
+
+-- 5/ Lập danh sách tên sản phẩm, số lượng, đơn giá và tên kho của các sản phẩm thuộc danh mục CAT003, sắp xếp theo tên kho tăng dần 
+--    theo số lượng giảm dần.
+SELECT SP.TenSanPham, SP.SoLuongTon, SP.DonGia , K.TenKho
+FROM SAN_PHAM AS SP
+JOIN TON_KHO AS TK ON SP.MaSanPham = TK.MaSanPham
+JOIN KHO AS K ON K.MaKho = TK.MaKho
+WHERE SP.MaDanhMuc = 'CAT003' 
+ORDER BY K.TenKho ASC, SP.SoLuongTon DESC
+GO
+
+-- 6/ Lập danh sách tên danh mục và tổng số lượng tồn kho của các sản phẩm thuộc danh mục.
+SELECT DM.TenDanhMuc, 
+	   SUM(SP.SoLuongTon) AS TongSP
+FROM DANH_MUC AS DM
+JOIN SAN_PHAM AS SP ON DM.MaDanhMuc = SP.MaDanhMuc
+GROUP BY DM.TenDanhMuc
+GO
+
+-- 7/ Lập danh sách các nhà cung cấp có tổng giá trị hàng nhập (dựa trên SoLuong * DonGiaNhap từ các đơn nhập hàng có trạng thái là R) 
+--    trong tháng 5/2025 lớn 5000. Danh sách gồm các thông tin mã số, tên nhà cung cấp và tổng giá trị hàng nhập.
+SELECT NCC.MaNhaCungCap, NCC.TenNhaCungCap, SUM(CTDN.SoLuong * CTDN.DonGiaNhap)  AS TongGiaTri
+FROM NHA_CUNG_CAP AS NCC
+JOIN DON_NHAP_HANG AS DNH ON NCC.MaNhaCungCap = DNH.MaNhaCungCap
+JOIN CHI_TIET_DON_NHAP AS CTDN ON DNH.MaDonNhap = CTDN.MaDonNhap
+WHERE DNH.TrangThai = 'R' AND YEAR(DNH.NgayDatHang) = 2025 AND MONTH(DNH.NgayDatHang) = 5 
+GROUP BY NCC.MaNhaCungCap, NCC.TenNhaCungCap
+HAVING SUM(CTDN.SoLuong * CTDN.DonGiaNhap)> 5000
+GO
+
+-- 8/ Lập danh sách mã số, tên và số lượng các sản phẩm có số lượng tại kho WH001 lớn hơn mức trung bình của tất cả các sản phẩm tại kho WH001.
+SELECT SP.MaSanPham, SP.TenSanPham, TK.SoLuong
+FROM SAN_PHAM AS SP
+JOIN TON_KHO AS TK ON SP.MaSanPham = TK.MaSanPham
+WHERE TK.MaKho = 'WH001' AND TK.SoLuong > (
+	SELECT AVG(TK.SoLuong) 
+	FROM TON_KHO AS TK
+	WHERE TK.MaKho = 'WH001'
+)
+GO
+
+-- Sử dụng bảng phụ WITH
+WITH TrungBinhLuong AS (
+	SELECT AVG(TK.SoLuong) AS TrungBinh
+	FROM TON_KHO AS TK
+	WHERE TK.MaKho = 'WH001'
+)
+SELECT SP.MaSanPham, SP.TenSanPham, TK.SoLuong
+FROM SAN_PHAM AS SP
+JOIN TON_KHO AS TK ON SP.MaSanPham = TK.MaSanPham
+CROSS JOIN TrungBinhLuong AS TBL
+WHERE TK.MaKho = 'WH001' AND TK.SoLuong > TBL.TrungBinh
+GO
+
+-- 9/ Lập danh sách các kho có tổng số lượng sản phẩm đã nhập ( I ) lớn hơn số lượng tồn kho trung bình của tất cả sản phẩm trong danh mục Thuc pham. 
+--	  Danh sách gồm các thông tin mã số kho, tên kho và tổng số lượng sản phẩm đã nhập.
+-- Truy vấn lồng
+SELECT K.MaKho, K.TenKho, SUM( GDK.SoLuong ) AS TongSL
+FROM KHO AS K
+JOIN GIAO_DICH_KHO AS GDK ON K.MaKho = GDK.MaKho
+WHERE GDK.LoaiGiaoDich = 'I'
+GROUP BY K.MaKho, K.TenKho
+HAVING SUM(GDK.SoLuong) > ( 
+	SELECT AVG (SP.SoLuongTon)
+	FROM SAN_PHAM AS SP
+	JOIN DANH_MUC AS DM ON SP.MaDanhMuc = DM.MaDanhMuc
+	WHERE DM.TenDanhMuc = 'Thuc pham'
+)
+GO
+
+-- Sử dụng bảng phụ WITH 
+WITH SanPhamDaNhap AS(
+	SELECT K.MaKho , K.TenKho , SUM(GDK.SoLuong) AS TongSL
+	FROM KHO AS K
+	JOIN GIAO_DICH_KHO AS GDK ON K.MaKho = GDK.MaKho
+	WHERE GDK.LoaiGiaoDich = 'I'
+	GROUP BY K.MaKho, K.TenKho
+),
+TrungBinhKho AS(
+	SELECT AVG(SP.SoLuongTon) AS TB
+	FROM SAN_PHAM AS SP
+	JOIN DANH_MUC AS DM ON SP.MaDanhMuc = DM.MaDanhMuc
+	WHERE DM.TenDanhMuc = 'Thuc pham'
+)
+SELECT SPDN.MaKho, SPDN.TenKho, SPDN.TongSL
+FROM SanPhamDaNhap AS SPDN
+CROSS JOIN TrungBinhKho AS TBK
+WHERE SPDN.TongSL > TBK.TB
+GO
+-- 10/ Lập danh sách các danh mục sản phẩm có tổng giá trị hàng nhập
+--     (dựa trên SoLuong * DonGiaNhap của các đơn nhập hàng có trạng thái là R) 
+--	   trong tháng 5/2025 lớn hơn mức trung bình trong cùng tháng của tất cả các danh mục. Danh sách gồm các thông tin mã danh mục, 
+--     tên danh mục, tổng giá trị hàng nhập.
+-- Truy vấn lồng
+SELECT 
+    DM.MaDanhMuc, 
+    DM.TenDanhMuc, 
+    SUM(CTDN.DonGiaNhap * CTDN.SoLuong) AS TongGiaTri
+FROM DANH_MUC AS DM
+JOIN SAN_PHAM AS SP ON DM.MaDanhMuc = SP.MaDanhMuc
+JOIN CHI_TIET_DON_NHAP AS CTDN ON CTDN.MaSanPham = SP.MaSanPham
+JOIN DON_NHAP_HANG AS DNH ON DNH.MaDonNhap = CTDN.MaDonNhap
+WHERE DNH.TrangThai = 'R' 
+  AND YEAR(DNH.NgayDatHang) = 2025 
+  AND MONTH(DNH.NgayDatHang) = 5 
+GROUP BY DM.MaDanhMuc, DM.TenDanhMuc
+HAVING SUM(CTDN.DonGiaNhap * CTDN.SoLuong) > (
+    SELECT AVG(TongGiaTriDanhMuc)
+    FROM (
+        SELECT 
+            DM2.MaDanhMuc,
+            SUM(CTDN2.DonGiaNhap * CTDN2.SoLuong) AS TongGiaTriDanhMuc
+        FROM DANH_MUC AS DM2
+        JOIN SAN_PHAM AS SP2 ON DM2.MaDanhMuc = SP2.MaDanhMuc
+        JOIN CHI_TIET_DON_NHAP AS CTDN2 ON CTDN2.MaSanPham = SP2.MaSanPham
+        JOIN DON_NHAP_HANG AS DNH2 ON DNH2.MaDonNhap = CTDN2.MaDonNhap
+        WHERE DNH2.TrangThai = 'R' 
+          AND YEAR(DNH2.NgayDatHang) = 2025 
+          AND MONTH(DNH2.NgayDatHang) = 5
+        GROUP BY DM2.MaDanhMuc
+    ) AS Sub
+)
+
+-- Sử dụng bảng phụ WITH 
+WITH TongNhapDanhMuc AS (
+	SELECT DM.MaDanhMuc, 
+		   DM.TenDanhMuc, 
+		   SUM(CTDN.DonGiaNhap * CTDN.SoLuong) AS TongGiaTri
+	FROM DANH_MUC AS DM
+		JOIN SAN_PHAM AS SP ON DM.MaDanhMuc = SP.MaDanhMuc
+		JOIN CHI_TIET_DON_NHAP AS CTDN ON CTDN.MaSanPham = SP.MaSanPham
+		JOIN DON_NHAP_HANG AS DNH ON DNH.MaDonNhap = CTDN.MaDonNhap
+	WHERE DNH.TrangThai = 'R' 
+		  AND YEAR(DNH.NgayDatHang) = 2025 
+		  AND MONTH(DNH.NgayDatHang) = 5 
+	GROUP BY DM.MaDanhMuc, DM.TenDanhMuc
+),
+TrungBinh AS(
+	SELECT AVG(TNDM.TongGiaTri) AS GiaTriTB
+	FROM TongNhapDanhMuc AS TNDM
+)
+SELECT TNDM.MaDanhMuc, 
+	   TNDM.TenDanhMuc, 
+	   TNDM.TongGiaTri
+FROM TongNhapDanhMuc AS TNDM
+CROSS JOIN TrungBinh AS TB
+WHERE TNDM.TongGiaTri > TB.GiaTriTB;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--cau 10
+with a as (
+select DANH_MUC.MaDanhMuc,DANH_MUC.TenDanhMuc,sum(CHI_TIET_DON_NHAP.SoLuong*CHI_TIET_DON_NHAP.DonGiaNhap) as Tonggiatri
+from DANH_MUC
+join SAN_PHAM on SAN_PHAM.MaDanhMuc = DANH_MUC.MaDanhMuc
+join CHI_TIET_DON_NHAP on CHI_TIET_DON_NHAP.MaSanPham = SAN_PHAM.MaSanPham
+join DON_NHAP_HANG on DON_NHAP_HANG.MaDonNhap = CHI_TIET_DON_NHAP.MaDonNhap
+where DON_NHAP_HANG.TrangThai = 'R' 
+and year(DON_NHAP_HANG.NgayDatHang) = 2025 
+and month(DON_NHAP_HANG.NgayDatHang) = 5
+group by DANH_MUC.MaDanhMuc,DANH_MUC.TenDanhMuc
+)
+select a.MaDanhMuc,a.TenDanhMuc, a.Tonggiatri
+from a
+join DANH_MUC on DANH_MUC.MaDanhMuc = a.MaDanhMuc
+where a.Tonggiatri > (
+select AVG(a.Tonggiatri)
+from a
+)
+
+
